@@ -37,7 +37,7 @@ void read_input(char *filename, cron_jobs *jobs) {
 	FILE *fp = fopen(filename, "r");
 	char *buf = malloc(sizeof(char) * MAX_STR);
 	cron_job *job;
-	while(fgets(buf, 255, fp) != NULL) {
+	while(fgets(buf, MAX_STR, fp) != NULL) {
 		job = malloc(sizeof(cron_job));
 		sscanf(buf, "%s %s %s", job->minute, job->hour, job->fire_task);
 		insert_jobs(job, jobs);
@@ -65,7 +65,7 @@ void print_jobs(cron_jobs *jobs) {
 }
 
 int main(int argc, char** argv) {
-	if(argc > 1) {
+	if(argc < 1) {
 		printf("config only needed\n");
 		return 1;
 	}
