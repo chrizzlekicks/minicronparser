@@ -1,13 +1,14 @@
 
-CC=clang
-CFLAGS=-g -Wall
-OBJ=minicron.c
-BIN=minicron
+CC = clang
+CFLAGS = -g -Wall
+OBJ = src/minicron.c
+BIN = minicron
 
-all:$(BIN)
+all: $(BIN)
 
-minicron: $(OBJ) 
-	$(CC) $(CFLAGS) $(OBJ) -o minicron
+minicron:  
+	mkdir bin
+	$(CC) $(CFLAGS) $(OBJ) -o bin/$(BIN)
 
 clean:
-	rm -rf minicron
+	rm -rf bin
