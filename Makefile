@@ -1,12 +1,12 @@
 
 CC = clang
 CFLAGS = -g -Wall
-OBJ = src/minicron.c
-BIN = minicron
+OBJ = src/*.c
+BIN = main
 
 all: $(BIN)
 
-minicron:  
+main:  
 	mkdir bin
 	$(CC) $(CFLAGS) $(OBJ) -o bin/$(BIN)
 

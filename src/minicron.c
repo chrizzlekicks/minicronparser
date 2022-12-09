@@ -1,35 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#define MAX_STR 255
-#define MAX_HOUR 24
-#define MAX_MINUTE 60
-
-typedef struct _cron_job {
-	char minute[MAX_STR];
-	char hour[MAX_STR];
-	char fire_task[MAX_STR];
-	struct _cron_job *next;
-} cron_job;
-
-typedef struct _parsed_job {
-	int minute;
-	int hour;
-	char day[MAX_STR];
-	char fire_task[MAX_STR];
-	struct _parsed_job *next;
-} parsed_job;
-
-typedef struct _cron_list {
-	cron_job *first;
-	cron_job *last;
-} cron_jobs;
-
-typedef struct _parsed_list {
-	parsed_job *first;
-	parsed_job *last;
-} parsed_jobs;
+#include "../lib/minicron.h"
 
 void init_jobs(cron_jobs *jobs) {
 	jobs->first = NULL;
@@ -98,6 +70,7 @@ void parse_jobs(char *current_time, cron_jobs *src, parsed_jobs *dest) {
 	char cpy[MAX_STR];
 	strcpy(cpy, current_time);
 	char delim[] = ":";
+	char star[] = "*";
 	char *token = strtok(cpy, delim);
 	int current_hour = atoi(token);
 	printf("%d\n", current_hour);
@@ -107,26 +80,23 @@ void parse_jobs(char *current_time, cron_jobs *src, parsed_jobs *dest) {
 	cron_job *job = src->first;
 	parsed_job *parsed_job = dest->first;
 	while(job != NULL) {
-		int new_hour = atoi(job->hour);
-		if(new_hour < current_hour) {
-			parsed_job->hour = new_hour;
-			parsed_job->minute = atoi(job->minute);
-			snprintf(parsed_job->day, MAX_STR, "%s", "tomorrow");
+		if(strcmp(star, job->hour) == 0) {
+			parsed_job->hour = current_hour;
+			snprintf(parsed_job->day, MAX_STR, "%s", "today");
+		} else {
+			int new_hour = atoi(job->hour);
+			if(new_hour < current_hour) {
+				parsed_job->hour = new_hour;
+				snprintf(parsed_job->day, MAX_STR, "%s", "tomorrow");
+			}
 		}
+		if(strcmp(star, job->minute) == 0) {
+			parsed_job->minute = current_min;
+		} else {
+			parsed_job->minute = atoi(job->minute);
+		}
+		snprintf(parsed_job->fire_task, MAX_STR, "%s", job->fire_task);
 		job = job->next;
 		parsed_job = parsed_job->next;
 	}
-}
-
-int main(int argc, char** argv) {
-	if(argc < 1) {
-		printf("config only needed\n");
-		return 1;
-	}
-	cron_jobs jobs;
-	init_jobs(&jobs);
-	read_input(argv[1], &jobs);
-	print_jobs(&jobs);
-	free_jobs(&jobs);
-	return 0;
 }
