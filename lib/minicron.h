@@ -1,3 +1,4 @@
+#define MAX_BUF 1023
 #define MAX_STR 255
 #define MAX_HOUR 24
 #define MAX_MINUTE 60
@@ -34,4 +35,5 @@ void read_input(char *filename, cron_jobs *jobs);
 void free_jobs(cron_jobs *jobs); 
 void free_parsed(parsed_jobs *jobs); 
 void print_jobs(cron_jobs *jobs);
-void parse_jobs(char *current_time, cron_jobs *src, parsed_jobs *dest); 
+void parse_jobs(char *current_time, cron_jobs *src, parsed_jobs *dest);
+void print_parsed(parsed_jobs *jobs);

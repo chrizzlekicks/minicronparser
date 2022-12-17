@@ -8,6 +8,7 @@ all: $(BIN)
 
 main:  
 	mkdir bin
+	cp -r input.txt bin
 	$(CC) $(CFLAGS) $(OBJ) -o bin/$(BIN)
 
 clean:
