@@ -16,12 +16,24 @@ In order to execute the program, you can use the following command with an examp
 cd bin && ./main input.txt 16:10
 ```
 
+Let's imagine the input file looks like this:
+```
+30 1 /bin/run_me_daily
+45 * /bin/run_me_hourly
+...
+```
+
 The program will print the scheduled cron jobs in a proper format and additionally determines whether the job will be fired today
 or tomorrow.
 ```
 01:30 tomorrow - /bin/run_me_daily
 16:45 today - /bin/run_me_hourly
 ...
+```
+
+In order to get rid of the executable, simply use the following command in the root of the project directory
+```
+make clean
 ```
 
 In case of questions, feel free to get in touch: chris.schimetschka@gmail.com 
