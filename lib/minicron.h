@@ -29,11 +29,12 @@ typedef struct _parsed_list {
 } parsed_jobs;
 
 void init_jobs(cron_jobs *jobs);
-void init_parsed_list(parsed_jobs *parsed);
+void init_parsed_jobs(parsed_jobs *pJobs);
 void insert_jobs(cron_job *job, cron_jobs *jobs);
+void insert_parsed(parsed_job *pJob, parsed_jobs *pJobs);
 void read_input(char *filename, cron_jobs *jobs);
 void free_jobs(cron_jobs *jobs); 
-void free_parsed(parsed_jobs *jobs); 
+void free_parsed(parsed_jobs *pJobs); 
 void print_jobs(cron_jobs *jobs);
 void parse_jobs(char *current_time, cron_jobs *src, parsed_jobs *dest);
-void print_parsed(parsed_jobs *jobs);
+void print_parsed(parsed_jobs *pJobs);

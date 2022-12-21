@@ -8,9 +8,9 @@ void init_jobs(cron_jobs *jobs) {
 	jobs->last = NULL;
 }
 
-void init_parsed_list(parsed_jobs *parsed) {
-	parsed->first = NULL;
-	parsed->last = NULL;
+void init_parsed_jobs(parsed_jobs *pJobs) {
+	pJobs->first = NULL;
+	pJobs->last = NULL;
 }
 
 void insert_jobs(cron_job *job, cron_jobs *jobs) {
@@ -23,6 +23,18 @@ void insert_jobs(cron_job *job, cron_jobs *jobs) {
 	jobs->last->next = job;
 	jobs->last = job;
 	job->next = NULL;
+}
+
+void insert_parsed(parsed_job *pJob, parsed_jobs *pJobs) {
+	if (pJobs->first == NULL) {
+		pJobs->first = pJob;
+		pJobs->last = pJob;
+		pJob->next = NULL;
+		return;
+	}
+	pJobs->last->next = pJob;
+	pJobs->last = pJob;
+	pJob->next = NULL;
 }
 
 void read_input(char *filename, cron_jobs *jobs) {
@@ -48,13 +60,13 @@ void free_jobs(cron_jobs *jobs) {
 	}
 }
 
-void free_parsed(parsed_jobs *jobs) {
-	parsed_job *parsed = jobs->first;
+void free_parsed(parsed_jobs *pJobs) {
+	parsed_job *pJob = pJobs->first;
 	parsed_job *tmp;
-	while (parsed != NULL) {
-		tmp = parsed->next;
-		free(parsed);
-		parsed = tmp;
+	while (pJob != NULL) {
+		tmp = pJob->next;
+		free(pJob);
+		pJob = tmp;
 	}
 }
 
@@ -73,46 +85,38 @@ void parse_jobs(char *current_time, cron_jobs *src, parsed_jobs *dest) {
 	char star[] = "*";
 	char *token = strtok(cpy, delim);
 	int current_hour = atoi(token);
-	token = strtok(NULL, ":");
+	token = strtok(NULL, delim);
 	int current_min = atoi(token);
 	cron_job *job = src->first;
-	parsed_job *parsed_job = dest->first;
+	parsed_job *pJob = dest->first;
 	while (job != NULL) {
-		int hora = strcmp(star, job->hour);
-		switch (hora) {
-			case 0:
-				parsed_job->hour = current_hour;
-				snprintf(parsed_job->day, MAX_STR, "%s", "today");
-				break;
-			case 1:
-				parsed_job->hour = atoi(job->hour);
-				if (parsed_job->hour < current_hour) {
-					snprintf(parsed_job->day, MAX_STR, "%s", "tomorrow");
-				} else {
-					snprintf(parsed_job->day, MAX_STR, "%s", "today");
-				}
-				break;
-			
+		pJob = malloc(sizeof(parsed_job));
+		if (strcmp(star, job->hour) == 0) {
+			pJob->hour = current_hour;
+			snprintf(pJob->day, MAX_STR, "%s", "today");
+		} else {
+			pJob->hour = atoi(job->hour);
+			if (pJob->hour < current_hour) {
+				snprintf(pJob->day, MAX_STR, "%s", "tomorrow");
+			} else {
+				snprintf(pJob->day, MAX_STR, "%s", "today");
+			}
 		}
-		int minuto = strcmp(star, job->minute);
-	       	switch (minuto) {
-			case 0: 
-				parsed_job->minute = current_min;
-				break;
-			case 1:
-				parsed_job->minute = atoi(job->minute);
-				break;
+		if (strcmp(star, job->minute) == 0) {
+			pJob->minute = current_min;
+		} else {
+			pJob->minute = atoi(job->minute);
 		}
-		snprintf(parsed_job->fire_task, MAX_STR, "%s", job->fire_task);
+		snprintf(pJob->fire_task, MAX_STR, "%s", job->fire_task);
+		insert_parsed(pJob, dest);
 		job = job->next;
-		parsed_job = parsed_job->next;
 	}
 }
 
-void print_parsed(parsed_jobs *jobs) {
-	parsed_job *job = jobs->first;
-	while (job != NULL) {
-		printf("%d:%d %s - %s\n", job->hour, job->minute, job->day, job->fire_task);
-		job = job->next;
+void print_parsed(parsed_jobs *pJobs) {
+	parsed_job *pJob = pJobs->first;
+	while (pJob != NULL) {
+		printf("%02d:%02d %s - %s\n", pJob->hour, pJob->minute, pJob->day, pJob->fire_task);
+		pJob = pJob->next;
 	}
 }

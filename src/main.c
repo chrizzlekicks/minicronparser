@@ -12,8 +12,9 @@ int main(int argc, char** argv) {
 	init_jobs(&jobs);
 	read_input(argv[1], &jobs);
 	print_jobs(&jobs);
+	printf("------------------------------------------------\n\r");
 	parsed_jobs pJobs;
-	init_parsed_list(&pJobs);
+	init_parsed_jobs(&pJobs);
 	parse_jobs(argv[2], &jobs, &pJobs);
 	print_parsed(&pJobs);
 	free_jobs(&jobs);
