@@ -7,18 +7,18 @@ second parameter. The program is entirely written in C and comes with a Makefile
 
 Clone the repository and jump into the root directory of the project. Compile the program by using the following command. This will
 create a `/bin` folder where the executable is located.
-sh```
+```
 make
 ```
 
 In order to execute the program, you can use the following command with an example time. Do not forget to import your config input!
-sh```
+```
 cd bin && ./main input.txt 16:10
 ```
 
 The program will print the scheduled cron jobs in a proper format and additionally determines whether the job will be fired today
 or tomorrow.
-sh```
+```
 01:30 tomorrow - /bin/run_me_daily
 16:45 today - /bin/run_me_hourly
 ...
