@@ -39,6 +39,10 @@ void insert_parsed(parsed_job *pJob, parsed_jobs *pJobs) {
 
 void read_input(char *filename, cron_jobs *jobs) {
 	FILE *fp = fopen(filename, "r");
+	if (fp == NULL) {
+		perror("Could not find input file\n");
+		exit(1);
+	}
 	char *buf = malloc(sizeof(char) * MAX_BUF);
 	cron_job *job;
 	while (fgets(buf, MAX_BUF, fp) != NULL) {
@@ -79,9 +83,17 @@ void print_jobs(cron_jobs *jobs) {
 }
 
 void parse_jobs(char *current_time, cron_jobs *src, parsed_jobs *dest) {
+	if (current_time == NULL) {
+		perror("Current time missing. Could not execute parsing\n");
+		exit(1);
+	}
 	char cpy[MAX_STR];
 	strcpy(cpy, current_time);
 	char delim[] = ":";
+	if (strstr(cpy, delim) == NULL) {
+		perror("Wrong time format. Could not execute parsing\n");
+		exit(1);
+	}
 	char star[] = "*";
 	char *token = strtok(cpy, delim);
 	int current_hour = atoi(token);
@@ -96,17 +108,11 @@ void parse_jobs(char *current_time, cron_jobs *src, parsed_jobs *dest) {
 			snprintf(pJob->day, MAX_STR, "%s", "today");
 		} else {
 			pJob->hour = atoi(job->hour);
-			if (pJob->hour < current_hour) {
-				snprintf(pJob->day, MAX_STR, "%s", "tomorrow");
-			} else {
-				snprintf(pJob->day, MAX_STR, "%s", "today");
-			}
+			(pJob->hour < current_hour) 
+				? snprintf(pJob->day, MAX_STR, "%s", "tomorrow") 
+				: snprintf(pJob->day, MAX_STR, "%s", "today");
 		}
-		if (strcmp(star, job->minute) == 0) {
-			pJob->minute = current_min;
-		} else {
-			pJob->minute = atoi(job->minute);
-		}
+		(strcmp(star, job->minute) == 0) ? (pJob->minute = current_min) : (pJob->minute = atoi(job->minute));
 		snprintf(pJob->fire_task, MAX_STR, "%s", job->fire_task);
 		insert_parsed(pJob, dest);
 		job = job->next;
@@ -115,6 +121,10 @@ void parse_jobs(char *current_time, cron_jobs *src, parsed_jobs *dest) {
 
 void print_parsed(parsed_jobs *pJobs) {
 	parsed_job *pJob = pJobs->first;
+	if (pJob == NULL) {
+		perror("No parsed jobs found\n");
+		exit(1);
+	}
 	while (pJob != NULL) {
 		printf("%02d:%02d %s - %s\n", pJob->hour, pJob->minute, pJob->day, pJob->fire_task);
 		pJob = pJob->next;
