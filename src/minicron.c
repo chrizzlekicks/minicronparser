@@ -38,18 +38,26 @@ void insert_parsed(parsed_job *pJob, parsed_jobs *pJobs) {
 }
 
 void read_input(char *filename, cron_jobs *jobs) {
+	/* opens file, stores it and returns file pointer */
 	FILE *fp = fopen(filename, "r");
 	if (fp == NULL) {
 		perror("Could not find input file\n");
 		exit(1);
 	}
+
+	/* creates pointer to a buffer where read values will be stored */
 	char *buf = malloc(sizeof(char) * MAX_BUF);
 	cron_job *job;
+
+	/* goes thru the file line by line until it reaches EOF, stores it in the buffer and writes it to respective job
+	 * before the job gets inserted into the list */
 	while (fgets(buf, MAX_BUF, fp) != NULL) {
 		job = malloc(sizeof(cron_job));
 		sscanf(buf, "%s %s %s", job->minute, job->hour, job->fire_task);
 		insert_jobs(job, jobs);
 	}
+
+	/* close file and frees allocated memory */
 	fclose(fp);
 	free(buf);
 }
@@ -83,26 +91,40 @@ void print_jobs(cron_jobs *jobs) {
 }
 
 void parse_jobs(char *current_time, cron_jobs *src, parsed_jobs *dest) {
+	/* checks if the pointer to current time is passed */
 	if (current_time == NULL) {
-		perror("Current time missing. Could not execute parsing\n");
+		perror("Current time is missing. Could not execute parsing\n");
 		exit(1);
 	}
+
+	/* creates copy of current time to avoid mutating initial value */
 	char cpy[MAX_STR];
 	strcpy(cpy, current_time);
 	char delim[] = ":";
+
+	/* checks the format of current timte */
 	if (strstr(cpy, delim) == NULL) {
 		perror("Wrong time format. Could not execute parsing\n");
 		exit(1);
 	}
+
+	/* splits current time into hours and minutes and store them in separate variables */
 	char star[] = "*";
 	char *token = strtok(cpy, delim);
 	int current_hour = atoi(token);
 	token = strtok(NULL, delim);
 	int current_min = atoi(token);
+
+	/* assigns respect list pointers to job and pJob */
 	cron_job *job = src->first;
 	parsed_job *pJob = dest->first;
+
+	/* actual parsing loop */
 	while (job != NULL) {
+		/* allocates memory for parsed_jobs */
 		pJob = malloc(sizeof(parsed_job));
+
+		/* compares hour strings and performs respective actions */
 		if (strcmp(star, job->hour) == 0) {
 			pJob->hour = current_hour;
 			snprintf(pJob->day, MAX_STR, "%s", "today");
@@ -112,9 +134,13 @@ void parse_jobs(char *current_time, cron_jobs *src, parsed_jobs *dest) {
 				? snprintf(pJob->day, MAX_STR, "%s", "tomorrow") 
 				: snprintf(pJob->day, MAX_STR, "%s", "today");
 		}
+
+		/* compares minute strings and performs respective actions */
 		(strcmp(star, job->minute) == 0) ? (pJob->minute = current_min) : (pJob->minute = atoi(job->minute));
 		snprintf(pJob->fire_task, MAX_STR, "%s", job->fire_task);
 		insert_parsed(pJob, dest);
+
+		/* points next pointer to current job */
 		job = job->next;
 	}
 }
