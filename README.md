@@ -31,6 +31,11 @@ or tomorrow.
 ...
 ```
 
+The parsing function is smart enough to identify outliers and acts accordingly. For example, if you try to pass the current time like
+`24:60`, the program will automatically convert into the right format like so: `01:00`. Why? Because 60 minutes add up to a full hour,
+therefore the hour gets +1 as the following hour would be reached, and 24 hours convert to 0 and hence, restart the clock. Feel free to 
+try it with times like `23:60`, `24:00`, but also see what happens when you try to enter numbers above 24 for hours and 60 for minutes.
+
 In order to get rid of the executable, simply use the following command in the root of the project directory
 ```
 make clean

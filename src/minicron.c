@@ -38,6 +38,7 @@ void insert_parsed(parsed_job *pJob, parsed_jobs *pJobs) {
 }
 
 void read_input(char *filename, cron_jobs *jobs) {
+
 	/* opens file, stores it and returns file pointer */
 	FILE *fp = fopen(filename, "r");
 	if (fp == NULL) {
@@ -91,6 +92,7 @@ void print_jobs(cron_jobs *jobs) {
 }
 
 void parse_jobs(char *current_time, cron_jobs *src, parsed_jobs *dest) {
+
 	/* checks if the pointer to current time is passed */
 	if (current_time == NULL) {
 		perror("Current time is missing. Could not execute parsing\n");
@@ -114,17 +116,43 @@ void parse_jobs(char *current_time, cron_jobs *src, parsed_jobs *dest) {
 	int current_hour = atoi(token);
 	token = strtok(NULL, delim);
 	int current_min = atoi(token);
-	if (current_hour >= MAX_HOUR || current_min >= MAX_MINUTE) {
+
+	/* checks if time is within time limits and if not exits from program or converts values respectively */
+	if (current_hour > MAX_HOUR || current_min > MAX_MINUTE) {
 		perror("Numbers above 23 for hours and 59 for minutes are not allowed\n");
 		exit(1);
-	}	
+	}
+	else if (current_hour == MAX_HOUR && current_min == MAX_MINUTE) {
+		current_min = 0;
+		current_hour = 1;
+		printf("The correctly converted time is %02d:%02d\n", current_hour, current_min);
+		printf("---------------------------------------------\n");
+	}
+	else if (current_hour == MAX_HOUR - 1 && current_min == MAX_MINUTE) {
+		current_min = 0;
+		current_hour = 0;
+		printf("The correctly converted time is %02d:%02d\n", current_hour, current_min);
+		printf("---------------------------------------------\n");
+	}
+	else if (current_min == MAX_MINUTE) {
+		current_min = 0;
+		current_hour++;
+		printf("The correctly converted time is %02d:%02d\n", current_hour, current_min);
+		printf("---------------------------------------------\n");
+	}
+	else {
+		current_hour = 0;
+		printf("The correctly converted time is %02d:%02d\n", current_hour, current_min);
+		printf("---------------------------------------------\n");
+	}
 
-	/* assigns respect list pointers to job and pJob */
+	/* assigns respective list pointers to job and pJob */
 	cron_job *job = src->first;
 	parsed_job *pJob = dest->first;
 
 	/* actual parsing loop */
 	while (job != NULL) {
+
 		/* allocates memory for parsed_jobs */
 		pJob = malloc(sizeof(parsed_job));
 
@@ -132,7 +160,8 @@ void parse_jobs(char *current_time, cron_jobs *src, parsed_jobs *dest) {
 		if (strcmp(star, job->hour) == 0) {
 			pJob->hour = current_hour;
 			snprintf(pJob->day, MAX_STR, "%s", "today");
-		} else {
+		} 
+		else {
 			pJob->hour = atoi(job->hour);
 			(pJob->hour < current_hour) 
 				? snprintf(pJob->day, MAX_STR, "%s", "tomorrow") 
