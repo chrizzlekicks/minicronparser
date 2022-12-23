@@ -104,13 +104,13 @@ void parse_jobs(char *current_time, cron_jobs *src, parsed_jobs *dest) {
 	strcpy(cpy, current_time);
 	char delim[] = ":";
 
-	/* checks the format of current timte */
+	/* checks the format of current time */
 	if (strstr(cpy, delim) == NULL) {
 		perror("Wrong time format. Could not execute parsing\n");
 		exit(1);
 	}
 
-	/* splits current time into hours and minutes and store them in separate variables */
+	/* splits current time into hours and minutes and stores them in separate variables */
 	char star[] = "*";
 	char *token = strtok(cpy, delim);
 	int current_hour = atoi(token);
@@ -122,29 +122,25 @@ void parse_jobs(char *current_time, cron_jobs *src, parsed_jobs *dest) {
 		perror("Numbers above 23 for hours and 59 for minutes are not allowed\n");
 		exit(1);
 	}
-	else if (current_hour == MAX_HOUR && current_min == MAX_MINUTE) {
+	if (current_hour == MAX_HOUR && current_min == MAX_MINUTE) {
 		current_min = 0;
 		current_hour = 1;
-		printf("The correctly converted time is %02d:%02d\n", current_hour, current_min);
-		printf("---------------------------------------------\n");
 	}
-	else if (current_hour == MAX_HOUR - 1 && current_min == MAX_MINUTE) {
+	if (current_hour == MAX_HOUR - 1 && current_min == MAX_MINUTE) {
 		current_min = 0;
 		current_hour = 0;
-		printf("The correctly converted time is %02d:%02d\n", current_hour, current_min);
-		printf("---------------------------------------------\n");
 	}
-	else if (current_min == MAX_MINUTE) {
+	if (current_min == MAX_MINUTE) {
 		current_min = 0;
 		current_hour++;
-		printf("The correctly converted time is %02d:%02d\n", current_hour, current_min);
-		printf("---------------------------------------------\n");
 	}
-	else {
+	if (current_hour == MAX_HOUR) {
 		current_hour = 0;
-		printf("The correctly converted time is %02d:%02d\n", current_hour, current_min);
-		printf("---------------------------------------------\n");
 	}
+	
+	/* print the correctly converted time */	
+	printf("The correctly converted time is %02d:%02d\n", current_hour, current_min);
+	printf("---------------------------------------------\n");
 
 	/* assigns respective list pointers to job and pJob */
 	cron_job *job = src->first;
