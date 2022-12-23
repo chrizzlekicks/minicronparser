@@ -114,6 +114,10 @@ void parse_jobs(char *current_time, cron_jobs *src, parsed_jobs *dest) {
 	int current_hour = atoi(token);
 	token = strtok(NULL, delim);
 	int current_min = atoi(token);
+	if (current_hour >= MAX_HOUR || current_min >= MAX_MINUTE) {
+		perror("Numbers above 23 for hours and 59 for minutes are not allowed\n");
+		exit(1);
+	}	
 
 	/* assigns respect list pointers to job and pJob */
 	cron_job *job = src->first;
