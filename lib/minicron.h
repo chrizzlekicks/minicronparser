@@ -111,3 +111,10 @@ void parse_jobs(char *current_time, cron_jobs *src, parsed_jobs *dest);
  * @return
  */
 void print_parsed(parsed_jobs *pJobs);
+
+/**
+ * Cleans up allocated memory and exits the program with the given error code.
+ * @param reference to cron_jobs list, reference to parsed_jobs list, error code
+ * @return
+ */
+void cleanup_and_exit(cron_jobs *jobs, parsed_jobs *pJobs, int errcode);

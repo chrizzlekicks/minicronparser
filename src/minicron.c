@@ -1,4 +1,5 @@
 #include "../lib/minicron.h"
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -121,10 +122,21 @@ void parse_jobs(char *current_time, cron_jobs *src, parsed_jobs *dest) {
   /* splits current time into hours and minutes and stores them in separate
    * variables */
   char star[] = "*";
+  char *endptr;
+  errno = 0;
   char *token = strtok(cpy, delim);
-  int current_hour = atoi(token);
+  long current_hour = strtol(token, &endptr, 10);
+  if (*endptr != '\0' || endptr == token) {
+    fprintf(stderr, "Invalid hour format: %s\n", token);
+    cleanup_and_exit(src, dest, 1);
+  }
   token = strtok(NULL, delim);
-  int current_min = atoi(token);
+  errno = 0;
+  long current_min = strtol(token, &endptr, 10);
+  if (*endptr != '\0' || endptr == token) {
+    fprintf(stderr, "Invalid minute format: %s\n", token);
+    cleanup_and_exit(src, dest, 1);
+  }
 
   /* checks if time is within time limits and if not exits from program or
    * converts values respectively */
@@ -150,7 +162,7 @@ void parse_jobs(char *current_time, cron_jobs *src, parsed_jobs *dest) {
   }
 
   /* print the correctly converted time */
-  printf("The correctly converted time is %02d:%02d\n", current_hour,
+  printf("The correctly converted time is %02ld:%02ld\n", current_hour,
          current_min);
   printf("---------------------------------------------\n");
 
@@ -166,18 +178,39 @@ void parse_jobs(char *current_time, cron_jobs *src, parsed_jobs *dest) {
 
     /* compares hour strings and performs respective actions */
     if (strcmp(star, job->hour) == 0) {
-      pJob->hour = current_hour;
+      pJob->hour = (int)current_hour;
       snprintf(pJob->day, MAX_STR, "%s", "today");
     } else {
-      pJob->hour = atoi(job->hour);
+      errno = 0;
+      long parsed_hour = strtol(job->hour, &endptr, 10);
+      if (*endptr != '\0' || endptr == job->hour || parsed_hour < 0 ||
+          parsed_hour > 23) {
+        fprintf(stderr, "Invalid hour value in job: %s\n", job->hour);
+        free(pJob);
+        job = job->next;
+        continue;
+      }
+      pJob->hour = (int)parsed_hour;
       (pJob->hour < current_hour)
           ? snprintf(pJob->day, MAX_STR, "%s", "tomorrow")
           : snprintf(pJob->day, MAX_STR, "%s", "today");
     }
 
     /* compares minute strings and performs respective actions */
-    (strcmp(star, job->minute) == 0) ? (pJob->minute = current_min)
-                                     : (pJob->minute = atoi(job->minute));
+    if (strcmp(star, job->minute) == 0) {
+      pJob->minute = (int)current_min;
+    } else {
+      errno = 0;
+      long parsed_min = strtol(job->minute, &endptr, 10);
+      if (*endptr != '\0' || endptr == job->minute || parsed_min < 0 ||
+          parsed_min > 59) {
+        fprintf(stderr, "Invalid minute value in job: %s\n", job->minute);
+        free(pJob);
+        job = job->next;
+        continue;
+      }
+      pJob->minute = (int)parsed_min;
+    }
     snprintf(pJob->fire_task, MAX_STR, "%s", job->fire_task);
     insert_parsed(pJob, dest);
 
@@ -197,4 +230,13 @@ void print_parsed(parsed_jobs *pJobs) {
            pJob->fire_task);
     pJob = pJob->next;
   }
+}
+
+void cleanup_and_exit(cron_jobs *jobs, parsed_jobs *pJobs, int errcode) {
+  if (jobs && jobs->first)
+    free_jobs(jobs);
+  if (pJobs && pJobs->first)
+    free_parsed(pJobs);
+
+  exit(errcode);
 }
