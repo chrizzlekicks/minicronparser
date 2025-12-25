@@ -105,7 +105,7 @@ void parse_jobs(char *current_time, cron_jobs *src, parsed_jobs *dest) {
   /* checks if the pointer to current time is passed */
   if (current_time == NULL) {
     fprintf(stderr, "Current time is missing. Could not execute parsing\n");
-    exit(1);
+    cleanup_and_exit(src, dest, 1);
   }
 
   /* creates copy of current time to avoid mutating initial value */
@@ -116,7 +116,7 @@ void parse_jobs(char *current_time, cron_jobs *src, parsed_jobs *dest) {
   /* checks the format of current time */
   if (strstr(cpy, delim) == NULL) {
     fprintf(stderr, "Wrong time format. Could not execute parsing\n");
-    exit(1);
+    cleanup_and_exit(src, dest, 1);
   }
 
   /* splits current time into hours and minutes and stores them in separate
